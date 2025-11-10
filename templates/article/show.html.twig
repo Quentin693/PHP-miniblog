@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block body %}
+<article class="article-detail">
+    <div class="article-header">
+        {% if article.imageUrl %}
+            <div class="article-hero-image">
+                <img src="{{ article.imageUrl }}" alt="{{ article.title }}">
+            </div>
+        {% endif %}
+        
+        <div class="container">
+            <div class="article-header-content">
+                {% if article.location %}
+                    <span class="article-location-badge">📍 {{ article.location }}</span>
+                {% endif %}
+                <h1 class="article-detail-title">{{ article.title }}</h1>
+                <div class="article-detail-meta">
+                    <span class="meta-item">
+                        <strong>Par</strong> {{ article.author.name }}
+                    </span>
+                    <span class="meta-divider">•</span>
+                    <span class="meta-item">
+                        <strong>Publié le</strong> {{ article.createdAt|date('d M Y') }}
+                    </span>
+                    <span class="meta-divider">•</span>
+                    <span class="meta-item">
+                        💬 {{ comments|length }} commentaire{{ comments|length > 1 ? 's' : '' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="article-body">
+            <div class="article-text">
+                {{ article.content|nl2br }}
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h2 class="section-title">Commentaires ({{ comments|length }})</h2>
+
+            {% if comments|length > 0 %}
+                <div class="comments-list">
+                    {% for comment in comments %}
+                        <div class="comment">
+                            <div class="comment-header">
+                                <span class="comment-author">{{ comment.authorName }}</span>
+                                <span class="comment-date">{{ comment.createdAt|date('d M Y à H:i') }}</span>
+                            </div>
+                            <div class="comment-content">
+                                {{ comment.content }}
+                            </div>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <div class="comment-actions">
+                                    <form method="post" action="{{ path('app_admin_comment_delete', {id: comment.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                        <button type="submit" class="btn-comment-delete">🗑️ Supprimer</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-comments">Soyez le premier à commenter cet article !</p>
+            {% endif %}
+
+            <div class="comment-form-section">
+                <h3 class="section-subtitle">Ajouter un commentaire</h3>
+                <form method="post" action="{{ path('app_article_comment', {slug: article.slug}) }}" class="comment-form">
+                    <div class="form-group">
+                        <label for="author_name">Nom *</label>
+                        <input type="text" id="author_name" name="author_name" required class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="author_email">Email *</label>
+                        <input type="email" id="author_email" name="author_email" required class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content">Commentaire *</label>
+                        <textarea id="content" name="content" rows="5" required class="form-textarea"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Publier le commentaire</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="article-actions-footer">
+            <a href="{{ path('app_home') }}" class="btn btn-secondary">← Retour aux articles</a>
+            {% if is_granted('ARTICLE_EDIT', article) %}
+                <a href="{{ path('app_admin_article_edit', {id: article.id}) }}" class="btn btn-primary">✏️ Modifier cet article</a>
+            {% endif %}
+        </div>
+    </div>
+</article>
+{% endblock %}
+

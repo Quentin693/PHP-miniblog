@@ -1,0 +1,296 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block body %}
+<section class="admin-section">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="page-title">📊 Dashboard Administration</h1>
+            <a href="{{ path('app_admin_article_new') }}" class="btn btn-primary">
+                ➕ Nouvel Article
+            </a>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-content">
+                    <h3>{{ articles|length }}</h3>
+                    <p>Articles récents</p>
+                </div>
+            </div>
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-content">
+                        <h3>{{ comments|length }}</h3>
+                        <p>Commentaires récents</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="admin-content">
+            <div class="admin-section-block">
+                <h2 class="section-title">Mes Articles</h2>
+                
+                {% if articles|length > 0 %}
+                    <div class="admin-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Statut</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for article in articles %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path('app_article_show', {slug: article.slug}) }}" class="article-link-admin">
+                                                {{ article.title }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if article.published %}
+                                                <span class="badge badge-success">Publié</span>
+                                            {% else %}
+                                                <span class="badge badge-draft">Brouillon</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ article.createdAt|date('d/m/Y') }}</td>
+                                        <td class="admin-actions">
+                                            {% if is_granted('ARTICLE_EDIT', article) %}
+                                                <a href="{{ path('app_admin_article_edit', {id: article.id}) }}" class="btn-icon" title="Modifier">
+                                                    ✏️
+                                                </a>
+                                            {% endif %}
+                                            {% if is_granted('ARTICLE_DELETE', article) %}
+                                                <form method="post" action="{{ path('app_admin_article_delete', {id: article.id}) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                                                    <button type="submit" class="btn-icon" title="Supprimer">🗑️</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="no-content">Aucun article pour le moment.</p>
+                {% endif %}
+            </div>
+
+            {% if is_granted('ROLE_ADMIN') and comments|length > 0 %}
+                <div class="admin-section-block">
+                    <h2 class="section-title">Commentaires Récents</h2>
+                    
+                    <div class="comments-admin-list">
+                        {% for comment in comments %}
+                            <div class="comment-admin-item">
+                                <div class="comment-admin-header">
+                                    <strong>{{ comment.authorName }}</strong>
+                                    <span class="comment-admin-date">{{ comment.createdAt|date('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="comment-admin-content">
+                                    {{ comment.content }}
+                                </div>
+                                <div class="comment-admin-footer">
+                                    <a href="{{ path('app_article_show', {slug: comment.article.slug}) }}">
+                                        Sur: {{ comment.article.title }}
+                                    </a>
+                                    <form method="post" action="{{ path('app_admin_comment_delete', {id: comment.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                        <button type="submit" class="btn-small btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<style>
+.admin-section {
+    padding: 4rem 0;
+    min-height: 60vh;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    font-size: 3rem;
+}
+
+.stat-content h3 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.stat-content p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.admin-section-block {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background: var(--color-bg);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: transform 0.2s;
+}
+
+.btn-icon:hover {
+    transform: scale(1.2);
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-draft {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.article-link-admin {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.article-link-admin:hover {
+    text-decoration: underline;
+}
+
+.comment-admin-item {
+    background: var(--color-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.comment-admin-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.comment-admin-date {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+.comment-admin-content {
+    margin: 0.75rem 0;
+    color: var(--color-text);
+}
+
+.comment-admin-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-small {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.no-content {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-light);
+}
+</style>
+{% endblock %}
+

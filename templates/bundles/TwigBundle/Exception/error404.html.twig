@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page non trouvée - 404{% endblock %}
+
+{% block body %}
+<section class="error-section">
+    <div class="container">
+        <div class="error-content">
+            <div class="error-icon">🏰</div>
+            <h1 class="error-title">404</h1>
+            <h2 class="error-subtitle">Monument Introuvable</h2>
+            <p class="error-message">
+                Désolé, la page que vous recherchez semble s'être perdue dans les méandres de l'histoire...
+            </p>
+            <div class="error-actions">
+                <a href="{{ path('app_home') }}" class="btn btn-primary">
+                    Retour à l'accueil
+                </a>
+                <a href="{{ path('app_articles') }}" class="btn btn-secondary">
+                    Voir tous les articles
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.error-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.error-content {
+    max-width: 600px;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 1rem;
+}
+
+.error-title {
+    font-family: var(--font-heading);
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.error-subtitle {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .error-title {
+        font-size: 5rem;
+    }
+    
+    .error-subtitle {
+        font-size: 1.5rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body_class %}class="home-page"{% endblock %}
+
+{% block body %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Monuments de France</h1>
+        <p class="hero-subtitle">Découvrez les joyaux architecturaux et sites historiques qui font la splendeur du patrimoine français</p>
+    </div>
+</section>
+
+<section class="filters-section">
+    <div class="container">
+        <div class="filters-wrapper">
+            <div class="filter-group">
+                <h3 class="filter-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Régions
+                </h3>
+                <div class="filter-buttons">
+                    <a href="{{ path('app_home', {category: selectedCategory}) }}" 
+                       class="filter-btn {% if not selectedRegion %}active{% endif %}">
+                        Toutes
+                    </a>
+                    {% for region in regions %}
+                        <a href="{{ path('app_home', {region: region, category: selectedCategory}) }}" 
+                           class="filter-btn {% if selectedRegion == region %}active{% endif %}">
+                            {{ region }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="filter-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    Catégories
+                </h3>
+                <div class="filter-buttons">
+                    <a href="{{ path('app_home', {region: selectedRegion}) }}" 
+                       class="filter-btn {% if not selectedCategory %}active{% endif %}">
+                        Toutes
+                    </a>
+                    {% for category in categories %}
+                        <a href="{{ path('app_home', {category: category, region: selectedRegion}) }}" 
+                           class="filter-btn {% if selectedCategory == category %}active{% endif %}">
+                            {% if category == 'monuments' %}
+                                🏛️ Monuments
+                            {% elseif category == 'châteaux' %}
+                                🏰 Châteaux
+                            {% elseif category == 'cathédrales' %}
+                                ⛪ Cathédrales
+                            {% elseif category == 'décors' %}
+                                🌳 Décors
+                            {% else %}
+                                {{ category|capitalize }}
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if selectedCategory or selectedRegion %}
+            <div class="active-filters">
+                <span class="active-filters-label">Filtres actifs :</span>
+                {% if selectedCategory %}
+                    <span class="active-filter-badge">
+                        {{ selectedCategory|capitalize }}
+                        <a href="{{ path('app_home', {region: selectedRegion}) }}" class="remove-filter">×</a>
+                    </span>
+                {% endif %}
+                {% if selectedRegion %}
+                    <span class="active-filter-badge">
+                        {{ selectedRegion }}
+                        <a href="{{ path('app_home', {category: selectedCategory}) }}" class="remove-filter">×</a>
+                    </span>
+                {% endif %}
+                <a href="{{ path('app_home') }}" class="clear-filters">Réinitialiser tous les filtres</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="articles-section">
+    <div class="container">
+        {% if articles|length > 0 %}
+            <div class="articles-grid">
+                {% for article in articles %}
+                    <article class="article-card">
+                        <a href="{{ path('app_article_show', {slug: article.slug}) }}" class="article-link">
+                            <div class="article-image">
+                                {% if article.imageUrl %}
+                                    <img src="{{ article.imageUrl }}" alt="{{ article.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="article-image-placeholder">🏰</div>
+                                {% endif %}
+                                <div class="article-overlay">
+                                    <span class="read-more">Lire l'article →</span>
+                                </div>
+                            </div>
+                            <div class="article-content">
+                                {% if article.location %}
+                                    <span class="article-location">📍 {{ article.location }}</span>
+                                {% endif %}
+                                <h2 class="article-title">{{ article.title }}</h2>
+                                <p class="article-excerpt">{{ article.excerpt }}</p>
+                                <div class="article-meta">
+                                    <span class="article-date">{{ article.createdAt|date('d M Y') }}</span>
+                                    <span class="article-author">Par {{ article.author.name }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {% if totalPages > 1 %}
+                <div class="pagination">
+                    {% if currentPage > 1 %}
+                        <a href="{{ path('app_home', {page: currentPage - 1, category: selectedCategory, region: selectedRegion}) }}" class="pagination-link">← Précédent</a>
+                    {% endif %}
+                    
+                    {% for page in 1..totalPages %}
+                        {% if page == currentPage %}
+                            <span class="pagination-current">{{ page }}</span>
+                        {% else %}
+                            <a href="{{ path('app_home', {page: page, category: selectedCategory, region: selectedRegion}) }}" class="pagination-link">{{ page }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if currentPage < totalPages %}
+                        <a href="{{ path('app_home', {page: currentPage + 1, category: selectedCategory, region: selectedRegion}) }}" class="pagination-link">Suivant →</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-articles">
+                <p>Aucun article disponible pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

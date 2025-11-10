@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tous les articles{% endblock %}
+
+{% block body %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">Tous nos articles</h1>
+        <p class="page-subtitle">{{ articles|length }} monuments à découvrir</p>
+    </div>
+</section>
+
+<section class="articles-section">
+    <div class="container">
+        {% if articles|length > 0 %}
+            <div class="articles-list">
+                {% for article in articles %}
+                    <article class="article-item">
+                        <a href="{{ path('app_article_show', {slug: article.slug}) }}" class="article-item-link">
+                            <div class="article-item-image">
+                                {% if article.imageUrl %}
+                                    <img src="{{ article.imageUrl }}" alt="{{ article.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="article-image-placeholder">🏰</div>
+                                {% endif %}
+                            </div>
+                            <div class="article-item-content">
+                                {% if article.location %}
+                                    <span class="article-location">📍 {{ article.location }}</span>
+                                {% endif %}
+                                <h2 class="article-item-title">{{ article.title }}</h2>
+                                <p class="article-item-excerpt">{{ article.excerpt }}</p>
+                                <div class="article-meta">
+                                    <span class="article-date">{{ article.createdAt|date('d M Y') }}</span>
+                                    <span class="article-author">Par {{ article.author.name }}</span>
+                                    <span class="article-comments">💬 {{ article.comments|length }} commentaires</span>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {% if totalPages > 1 %}
+                <div class="pagination">
+                    {% if currentPage > 1 %}
+                        <a href="{{ path('app_articles', {page: currentPage - 1}) }}" class="pagination-link">← Précédent</a>
+                    {% endif %}
+                    
+                    {% for page in 1..totalPages %}
+                        {% if page == currentPage %}
+                            <span class="pagination-current">{{ page }}</span>
+                        {% else %}
+                            <a href="{{ path('app_articles', {page: page}) }}" class="pagination-link">{{ page }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if currentPage < totalPages %}
+                        <a href="{{ path('app_articles', {page: currentPage + 1}) }}" class="pagination-link">Suivant →</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-articles">
+                <p>Aucun article disponible pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

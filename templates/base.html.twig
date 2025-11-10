@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Miniblog{% endblock %} - Découvrez les trésors de la France</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🏰</text></svg>">
+        
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+        <script>
+            // Gestion du scroll pour le header transparent
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    document.body.classList.add('scrolled');
+                } else {
+                    document.body.classList.remove('scrolled');
+                }
+            });
+        </script>
+        <script src="{{ asset('js/filters.js') }}" defer></script>
+    </head>
+    <body {% block body_class %}{% endblock %}>
+        <header class="header">
+            <div class="container">
+                <nav class="navbar">
+                    <a href="{{ path('app_home') }}" class="logo">
+                        <span class="logo-text">Découvrir la France</span>
+                    </a>
+                    <ul class="nav-menu">
+                        <li><a href="{{ path('app_home') }}" class="nav-link">Accueil</a></li>
+                        <li><a href="{{ path('app_articles') }}" class="nav-link">Articles</a></li>
+                        {% if is_granted('ROLE_USER') %}
+                            <li><a href="{{ path('app_admin_dashboard') }}" class="nav-link">Dashboard</a></li>
+                            <li><a href="{{ path('app_logout') }}" class="nav-link">Déconnexion</a></li>
+                        {% else %}
+                            <li><a href="{{ path('app_login') }}" class="nav-link">Connexion</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            {% for label, messages in app.flashes %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message flash-{{ label }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Miniblog</h3>
+                        <p>Découvrez les plus beaux monuments et trésors de la France</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                            <li><a href="{{ path('app_articles') }}">Articles</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>À propos</h4>
+                        <p>Projet Symfony - EEMI {{ 'now'|date('Y') }}</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; {{ 'now'|date('Y') }} Miniblog. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
